@@ -335,11 +335,43 @@ def main():
     # 设置设备
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    # 自动检测当前工作目录并设置正确的数据路径
+    current_dir = os.getcwd()
+    print(f"当前工作目录: {current_dir}")
     
+    # 可能的数据路径
+    possible_data_paths = [
+        '../data/DATA_01/TRAIN_DATA/DATA_01',  # 从code目录运行
+        'data/DATA_01/TRAIN_DATA/DATA_01',     # 从项目根目录运行
+        './data/DATA_01/TRAIN_DATA/DATA_01'    # 从项目根目录运行的另一种形式
+    ]
+    
+    # 找到第一个存在的路径
+    data_dir = None
+    for path in possible_data_paths:
+        if os.path.exists(path):
+            data_dir = path
+            break
+    
+    # 如果没有找到路径，尝试获取绝对路径
+    if data_dir is None:
+        project_root = os.path.abspath(os.path.join(current_dir, os.pardir)) if 'code' in current_dir else current_dir
+        data_dir = os.path.join(project_root, 'data', 'DATA_01', 'TRAIN_DATA', 'DATA_01')
+        if not os.path.exists(data_dir):
+            # 最后尝试使用硬编码的绝对路径
+            data_dir = '/Users/mac/PycharmProjects/school/comsen/dachuang/comsen_radar/data/DATA_01/TRAIN_DATA/DATA_01'
+    
+    print(f"尝试加载数据目录: {data_dir}")
+    print(f"数据目录是否存在: {os.path.exists(data_dir)}")
+    print(f"绝对路径: {os.path.abspath(data_dir)}")
+    
+    if not os.path.exists(data_dir):
+        raise FileNotFoundError(f"无法找到数据目录: {data_dir}，请确保数据存在或手动指定正确路径")
     
     # 创建数据集
     transform = RCSTransform(normalize=True, augment=True)
-    dataset = RCSDataset(data_dir='DATA_01', transform=transform)
+    dataset = RCSDataset(data_dir=data_dir, transform=transform)
+
     
     # 获取第一个样本来确定特征维度
     first_sample, _ = dataset[0]
