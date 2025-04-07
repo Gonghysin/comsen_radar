@@ -185,3 +185,7 @@ data/
 
 # 个人自己的测试脚本
 my_test/
+code/best_model.pth
+
+# 忽略所有.pth模型文件
+*.pth
