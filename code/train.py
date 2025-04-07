@@ -368,6 +368,17 @@ def main():
     if not os.path.exists(data_dir):
         raise FileNotFoundError(f"无法找到数据目录: {data_dir}，请确保数据存在或手动指定正确路径")
     
+    # 创建模型保存目录
+    if 'code' in current_dir:
+        model_save_dir = '../result/models'
+    else:
+        model_save_dir = 'result/models'
+    
+    # 确保保存模型的目录存在
+    os.makedirs(model_save_dir, exist_ok=True)
+    model_save_path = os.path.join(model_save_dir, 'best_model.pth')
+    print(f"模型将保存到: {os.path.abspath(model_save_path)}")
+    
     # 创建数据集
     transform = RCSTransform(normalize=True, augment=True)
     dataset = RCSDataset(data_dir=data_dir, transform=transform)
@@ -418,7 +429,7 @@ def main():
         # 保存最佳模型
         if val_acc > best_acc:
             best_acc = val_acc
-            trainer.save_model('best_model.pth')
+            trainer.save_model(model_save_path)
             print(f"模型已保存，验证准确率: {val_acc:.2f}%")
     
     print(f"训练完成，最佳验证准确率: {best_acc:.2f}%")
